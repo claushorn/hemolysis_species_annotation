@@ -1,0 +1,63 @@
+{
+  "records_total": 5461,
+  "records_erythrocyte": 3975,
+  "records_erythrocyte_hc50_endpoint": 3142,
+  "records_erythrocyte_other_endpoint": 833,
+  "peptides": 3001,
+  "target_cells_distinct": 16,
+  "target_cell_named_pct": 100.0,
+  "non_mammalian_records": 14,
+  "nucleated_records": 14,
+  "by_target_cell": {
+    "Human erythrocytes": 2860,
+    "Horse erythrocytes": 228,
+    "Mouse erythrocytes": 223,
+    "Rat erythrocytes": 215,
+    "Pig erythrocytes": 185,
+    "Sheep erythrocytes": 147,
+    "Rabbit erythrocytes": 69,
+    "Bovine erythrocytes": 14,
+    "Dog erythrocytes": 9,
+    "Guinea pig erythrocytes": 6,
+    "Chicken erythrocytes": 5,
+    "Fish erythrocytes": 4,
+    "Salmon erythrocytes": 3,
+    "Goat erythrocytes": 3,
+    "Tilapia erythrocytes": 2,
+    "Buffalo erythrocytes": 2
+  },
+  "peptides_with_eligible_records": 2997,
+  "peptides_pooling_multiple_target_cells": 47,
+  "peptides_pooling_multiple_target_cells_pct": 1.57,
+  "peptides_mixing_nucleated_and_not": 4,
+  "ampbench_refs": 1852,
+  "ampbench_refs_resolved": 1852,
+  "ampbench_refs_resolved_pct": 100.0,
+  "ampbench_consumed_records_other_endpoint": 4,
+  "ampbench_consumed_other_endpoint_detail": [
+    {
+      "peptide_id": 4680,
+      "record_id": 3561,
+      "target_cell": "Human erythrocytes",
+      "lysis_endpoint": ">50% Hemolysis"
+    },
+    {
+      "peptide_id": 10237,
+      "record_id": 8739,
+      "target_cell": "Rabbit erythrocytes",
+      "lysis_endpoint": "9.63\u00b11.50% Hemolysis"
+    },
+    {
+      "peptide_id": 14040,
+      "record_id": 12760,
+      "target_cell": "Horse erythrocytes",
+      "lysis_endpoint": "72.35\u00b117.50% Hemolysis"
+    },
+    {
+      "peptide_id": 21835,
+      "record_id": 20788,
+      "target_cell": "Human erythrocytes",
+      "lysis_endpoint": "0.50\u00b10.26% Hemolysis"
+    }
+  ]
+}

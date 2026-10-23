@@ -1,0 +1,48 @@
+The annotation table in `annotation/` is released under the
+Creative Commons Attribution 4.0 International licence (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+The code in `dbaasp_target_cell/` and `build_annotation.py` is released under the
+MIT licence, below.
+
+-------------------------------------------------------------------------------
+ATTRIBUTION REQUIRED BY THE DATA SOURCE
+
+The annotated facts are derived from DBAASP (Database of Antimicrobial Activity
+and Structure of Peptides), whose Data Access Policy permits access, copying,
+adaptation and redistribution without restriction but requires that DBAASP be
+acknowledged as the source in publications, presentations, datasets and
+software, including after modification or combination with other data.
+
+Any use of this annotation must therefore carry that acknowledgement and cite:
+
+  Pirtskhalava M. et al. DBAASP v3: database of antimicrobial/cytotoxic activity
+  and structure of peptides as a resource for development of new therapeutics.
+  Nucleic Acids Research, 2021. https://dbaasp.org
+
+This annotation contains no data from AMPBench-MT or from QMAP: only DBAASP
+record identifiers and DBAASP-derived fields. See README.md, "Provenance and
+licensing".
+
+-------------------------------------------------------------------------------
+MIT License (code)
+
+Copyright (c) 2026 Claus Horn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

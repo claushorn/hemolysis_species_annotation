@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+title: >-
+  Recovered target-cell annotation for the DBAASP hemolytic activity records
+  used by the AMPBench-MT and QMAP HC50 benchmarks
+abstract: >-
+  Both the AMPBench-MT and QMAP HC50 regression targets aggregate DBAASP
+  hemolytic/cytotoxic activity records while discarding the identity of the cell
+  the assay was performed on. AMPBench-MT retains a two-valued cell_category and
+  a target-cell count but not the names; QMAP retains only [min, max, consensus]
+  with no cell field, while keeping full species names for its bacterial MIC
+  targets. This annotation recovers the discarded field from DBAASP for every
+  record either benchmark consumes, keyed by DBAASP's own identifiers, together
+  with the donor taxon, whether the erythrocytes are nucleated, the reported
+  concentration unit and the verbatim lysis endpoint. It is intended to make
+  per-target-cell evaluation possible; it is not proposed as a route to higher
+  predictive accuracy.
+type: dataset
+authors:
+  - family-names: Horn
+    given-names: Claus
+    alias: claushorn
+license: CC-BY-4.0
+keywords:
+  - antimicrobial peptides
+  - hemolysis
+  - HC50
+  - benchmark
+  - data annotation
+  - evaluation
+references:
+  - type: database
+    title: >-
+      DBAASP v3: database of antimicrobial/cytotoxic activity and structure of
+      peptides as a resource for development of new therapeutics
+    authors:
+      - family-names: Pirtskhalava
+        given-names: Malak
+    year: 2021
+    journal: Nucleic Acids Research
+    url: https://dbaasp.org
+    notes: >-
+      Source of every annotated fact. DBAASP's Data Access Policy requires
+      acknowledgement as the source, including in derived datasets.
+  - type: article
+    title: >-
+      QMAP: A Benchmark for Standardized Evaluation of Antimicrobial Peptide MIC
+      and Hemolytic Activity Regression
+    authors:
+      - family-names: Lavertu
+        given-names: Anthony
+      - family-names: Corbeil
+        given-names: Jacques
+      - family-names: Germain
+        given-names: Pascal
+    year: 2026
+    doi: 10.64898/2026.02.03.703041
+    notes: One of the two benchmarks this annotation is built to be joined to.
