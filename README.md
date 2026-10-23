@@ -83,9 +83,16 @@ nucleated erythrocytes.
 ### Pooled peptide-level HC50 is not reproducible
 
 Restricted to records at a 50% endpoint — the ones an HC50 target can legitimately be built
-from — **47 of 2,997 peptides (1.6%) have records from more than one donor**, and **4 of
-those mix nucleated and non-nucleated donors**. A peptide-level `[min, max, consensus]` over
-such a set cannot be reconstructed, and the pooled value leaves no variable to condition on.
+from — peptides whose records span more than one donor:
+
+| scope | pooling >1 donor | max donors on one peptide | mixing nucleated & not |
+|---|---|---|---|
+| union of both benchmarks' peptides | 47 of 2,997 (1.6%) | 5 | 4 |
+| QMAP's HC50 peptides alone | 44 of 2,797 (1.6%) | 4 | 4 |
+
+A peptide-level `[min, max, consensus]` over such a set cannot be reconstructed, and the
+pooled value leaves no variable to condition on. Both scopes are in `coverage.json`: a
+claim addressed to one benchmark should use that benchmark's own count.
 
 ### Four consumed records are not HC50 measurements
 

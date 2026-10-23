@@ -54,7 +54,8 @@ def main() -> None:
     ap.add_argument("--cache", type=Path, default=HERE / "cache" / "dbaasp")
     args = ap.parse_args()
 
-    pids = set(qmap_hc50_peptide_ids())
+    qmap_ids = set(qmap_hc50_peptide_ids())
+    pids = set(qmap_ids)
     print(f"QMAP HC50 peptides: {len(pids)}")
 
     refs = None
@@ -89,14 +90,30 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     ann[COLUMNS].to_csv(OUT / CSV, index=False)
 
-    cov = coverage(ann, refs)
+    cov = coverage(ann, refs, qmap_ids)
     (OUT / "coverage.json").write_text(json.dumps(cov, indent=2) + "\n")
 
     print(f"\nwrote {OUT / CSV}  ({len(ann)} records, {ann.peptide_id.nunique()} peptides)")
     report(ann, cov)
 
 
-def coverage(ann: pd.DataFrame, refs: pd.DataFrame | None) -> dict:
+def pooling_stats(elig: pd.DataFrame, prefix: str) -> dict:
+    """Donor pooling at peptide granularity -- the granularity QMAP publishes."""
+    per = elig.groupby("peptide_id").target_cell.nunique()
+    nuc = elig.groupby("peptide_id").nucleated.agg(["any", "all"])
+    return {
+        f"{prefix}_peptides_with_eligible_records": int(len(per)),
+        f"{prefix}_peptides_pooling_multiple_target_cells": int((per > 1).sum()),
+        f"{prefix}_peptides_pooling_multiple_target_cells_pct": round(
+            100.0 * (per > 1).mean(), 2) if len(per) else 0.0,
+        f"{prefix}_max_target_cells_in_one_peptide": int(per.max()) if len(per) else 0,
+        f"{prefix}_peptides_mixing_nucleated_and_not": int(
+            (nuc["any"] & ~nuc["all"]).sum()),
+    }
+
+
+def coverage(ann: pd.DataFrame, refs: pd.DataFrame | None,
+             qmap_ids: set[int] | None = None) -> dict:
     ery = ann[ann.is_erythrocyte]
     # Records at a 50% endpoint are the ones an HC50 target can legitimately be
     # built from. The rest are hemolysis measured at some other level, which
@@ -115,17 +132,12 @@ def coverage(ann: pd.DataFrame, refs: pd.DataFrame | None) -> dict:
         "nucleated_records": int(ery.nucleated.fillna(False).sum()),
         "by_target_cell": ery.target_cell.value_counts().to_dict(),
     }
-    # How often does a peptide-level HC50 -- the granularity QMAP publishes --
-    # aggregate eligible records from more than one donor? Restricted to
-    # eligible records, or the figure would count assays no benchmark pools.
-    per_pep = elig.groupby("peptide_id").target_cell.nunique()
-    cov["peptides_with_eligible_records"] = int(len(per_pep))
-    cov["peptides_pooling_multiple_target_cells"] = int((per_pep > 1).sum())
-    cov["peptides_pooling_multiple_target_cells_pct"] = round(
-        100.0 * (per_pep > 1).mean(), 2)
-    nuc = elig.groupby("peptide_id").nucleated.agg(["any", "all"])
-    cov["peptides_mixing_nucleated_and_not"] = int(
-        (nuc["any"] & ~nuc["all"]).sum())
+    # Donor pooling, over the union of both benchmarks' peptides and again over
+    # QMAP's alone. A claim addressed to one benchmark must use that benchmark's
+    # own count, not the union's.
+    cov.update(pooling_stats(elig, "union"))
+    if qmap_ids is not None:
+        cov.update(pooling_stats(elig[elig.peptide_id.isin(qmap_ids)], "qmap"))
     if refs is not None:
         named = set(ann[ann.target_cell != ""].record_id)
         cov["ampbench_refs"] = int(len(refs))
@@ -171,12 +183,15 @@ def report(ann: pd.DataFrame, cov: dict) -> None:
     print(f"  records on non-mammalian erythrocytes   : "
           f"{cov['non_mammalian_records']} "
           f"(nucleated: {cov['nucleated_records']})")
-    print(f"  peptides pooling >1 donor, 50% endpoint : "
-          f"{cov['peptides_pooling_multiple_target_cells']} of "
-          f"{cov['peptides_with_eligible_records']} "
-          f"({cov['peptides_pooling_multiple_target_cells_pct']}%)")
-    print(f"  of those, mixing nucleated and not      : "
-          f"{cov['peptides_mixing_nucleated_and_not']}")
+    for scope in ["union", "qmap"]:
+        if f"{scope}_peptides_with_eligible_records" not in cov:
+            continue
+        print(f"  [{scope}] peptides pooling >1 donor        : "
+              f"{cov[f'{scope}_peptides_pooling_multiple_target_cells']} of "
+              f"{cov[f'{scope}_peptides_with_eligible_records']} "
+              f"({cov[f'{scope}_peptides_pooling_multiple_target_cells_pct']}%)"
+              f"  max {cov[f'{scope}_max_target_cells_in_one_peptide']} cells; "
+              f"{cov[f'{scope}_peptides_mixing_nucleated_and_not']} mix nucleated")
     if "ampbench_consumed_records_other_endpoint" in cov:
         print(f"  consumed records NOT at a 50% endpoint   : "
               f"{cov['ampbench_consumed_records_other_endpoint']}")
