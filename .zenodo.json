@@ -1,0 +1,37 @@
+{
+  "upload_type": "dataset",
+  "title": "Recovered target-cell and censoring annotation for the DBAASP hemolytic records used by the AMPBench-MT and QMAP HC50 benchmarks",
+  "creators": [
+    {
+      "name": "Horn, Claus"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "access_right": "open",
+  "description": "<p>Both the AMPBench-MT and QMAP HC50 regression targets aggregate DBAASP hemolytic/cytotoxic activity records while discarding two fields that are still present in the source. This annotation recovers both, for every record either benchmark consumes, keyed by DBAASP's own identifiers.</p><p><strong>The assay target cell.</strong> AMPBench-MT keeps a two-valued <code>cell_category</code> and a target-cell count but not the names; QMAP keeps only <code>[min, max, consensus]</code> with no cell field, while retaining full species names for its bacterial MIC targets. One label name covers 16 distinct donor cells across 3,975 erythrocyte records, including chicken, salmon, tilapia and unspecified fish, whose erythrocytes are nucleated and therefore a different membrane system. Coverage is 100%: all 1,852 records AMPBench-MT references resolve to a named target cell.</p><p><strong>The censoring.</strong> DBAASP stores the tested concentration as free text, and that text is the only place the censoring survives: <code>&gt;256</code> means the assay never reached 50% lysis at the highest concentration tested, so the true HC50 lies above the bound. Both benchmarks collapse such a bound to a point. 1,503 of 5,461 records (27.5%) are right-censored, and 1,171 of the 3,142 erythrocyte records at a 50% lysis endpoint are. Recording a bound as a point overstates toxicity, selectively, for exactly the least hemolytic peptides a safety model exists to identify.</p><p><strong>Scope and intent.</strong> The table carries 5,461 records over 3,001 peptides, with columns for the verbatim target cell, the donor species and taxon, whether those erythrocytes are nucleated, the reported concentration unit, the verbatim lysis endpoint, whether that endpoint is a 50% lysis point, and the censoring code. It is an evaluation-correctness artifact. Conditioning a model on the target cell is NOT proposed as a route to higher accuracy: measured on a matched protocol it is worth +0.013 Pearson r on AMPBench-MT and -0.001 on QMAP. Honouring the censoring is worth +0.074 (95% CI [+0.034, +0.119]) on QMAP's own five splits.</p><p><strong>Provenance.</strong> Every annotated fact comes from DBAASP (https://dbaasp.org), whose Data Access Policy permits redistribution including after modification and requires acknowledgement as the source. The annotation contains no AMPBench-MT or QMAP data: only DBAASP record identifiers and DBAASP-derived fields, with no sequences, HC50 values, splits or cluster assignments. The censoring column records whether a measurement was a bound, never what the measurement was.</p>",
+  "keywords": [
+    "antimicrobial peptides",
+    "hemolysis",
+    "HC50",
+    "DBAASP",
+    "benchmark",
+    "data annotation",
+    "evaluation",
+    "censored data",
+    "right censoring",
+    "erythrocytes"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.64898/2026.02.03.703041",
+      "relation": "references",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://dbaasp.org",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
+    }
+  ]
+}
