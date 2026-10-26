@@ -7,6 +7,16 @@
   "target_cells_distinct": 16,
   "target_cell_named_pct": 100.0,
   "non_mammalian_records": 14,
+  "records_by_censoring": {
+    "exact": 3827,
+    "right": 1503,
+    "missing": 62,
+    "interval": 36,
+    "left": 29,
+    "ambiguous": 4
+  },
+  "records_erythrocyte_hc50_right_censored": 1171,
+  "records_erythrocyte_hc50_right_censored_pct": 37.27,
   "nucleated_records": 14,
   "by_target_cell": {
     "Human erythrocytes": 2860,

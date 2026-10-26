@@ -58,6 +58,69 @@ ERYTHROCYTE_TAXON = {
 _HC50_ENDPOINT = re.compile(r"^\s*50(\.\d+)?\s*(±|\+/-)?\s*[\d.]*\s*%?\s*hemolysis\s*$",
                             re.IGNORECASE)
 
+_NUMBER = re.compile(r"\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?")
+
+
+def parse_concentration(raw: object) -> tuple[float, str]:
+    """Split DBAASP's free-text concentration into a value and a censoring code.
+
+    DBAASP stores the tested concentration as free text, and that text is the
+    only place the CENSORING survives. `256` is a measured HC50; `>256` means
+    the assay never reached the endpoint at the highest concentration tested,
+    so the true HC50 lies somewhere above 256. The numeric `activity` field
+    DBAASP also provides silently discards the `>`, and both HC50 benchmarks
+    inherit that loss: a bound becomes a point.
+
+    The orientation is easy to get backwards and matters a great deal. A
+    right-censored record is evidence that the peptide is *less* hemolytic than
+    the bound, so recording it as `HC50 = bound` overstates toxicity, and it
+    does so selectively, for exactly the non-hemolytic peptides a safety model
+    exists to identify.
+
+    Returns (value, censoring), with censoring one of:
+      ``exact``      a point measurement, possibly reported with a spread
+      ``right``      the assay did not reach the endpoint: HC50 > value
+      ``left``       HC50 < value
+      ``interval``   a reported range; the value is its geometric centre
+      ``ambiguous``  a bound whose direction the string does not fix (``200<``)
+      ``missing``    no parseable number
+
+    Only the censoring code is published (see COLUMNS); the value is returned
+    for callers that hold the measurements themselves, so that the code which
+    classifies a record and the code which reads its value cannot disagree.
+    """
+    if not isinstance(raw, str):
+        return float("nan"), "missing"
+    s = raw.strip()
+    if not s or s.upper() == "NA":
+        return float("nan"), "missing"
+
+    nums = _NUMBER.findall(s)
+    if not nums:
+        return float("nan"), "missing"
+    value = float(nums[0])
+
+    # Two-character operators first, or `>=65` and `>>600` both read as `>`.
+    if s.startswith((">=", ">>")) or s.lower().startswith("up to"):
+        return value, "right"
+    if s.startswith(">"):
+        return value, "right"
+    if s.startswith("<="):
+        return value, "left"
+    if s.startswith("<"):
+        return value, "left"
+    if s.endswith(("<", ">")):
+        # e.g. `200<`. Four records; the intended direction is not recoverable
+        # from the string, so they are flagged rather than guessed.
+        return value, "ambiguous"
+    if len(nums) == 2 and re.fullmatch(r"\s*[\d.]+\s*-\s*[\d.]+\s*", s):
+        lo, hi = float(nums[0]), float(nums[1])
+        if lo > 0 and hi > 0:
+            return float((lo * hi) ** 0.5), "interval"
+        return value, "interval"
+    # `221.8±7.8` and friends: a point measurement reported with its spread.
+    return value, "exact"
+
 
 def parse_source_ids(source_ids: pd.Series) -> pd.DataFrame:
     """AMPBench `source_ids` -> one row per referenced DBAASP toxicity record."""
@@ -84,6 +147,9 @@ def index_records(store: dict[int, dict]) -> pd.DataFrame:
                 target_cell=((r.get("targetCell") or {}).get("name") or "").strip(),
                 concentration_unit=((r.get("unit") or {}).get("name") or "").strip(),
                 lysis_endpoint=(r.get("activityMeasureForLysisValue") or "").strip(),
+                # Carried only so `annotate` can derive the censoring code; the
+                # raw string holds a measured value and is NOT published.
+                _concentration_raw=r.get("concentration"),
             ))
     return pd.DataFrame(rows)
 
@@ -115,11 +181,18 @@ def annotate(rec: pd.DataFrame) -> pd.DataFrame:
     out["is_erythrocyte"] = out.target_cell.str.contains(
         "erythrocyte|RBC", case=False, na=False)
     out["endpoint_is_hc50"] = out.lysis_endpoint.map(is_hc50_endpoint)
+    if "_concentration_raw" in out:
+        out["censoring"] = [parse_concentration(c)[1]
+                            for c in out._concentration_raw]
+    else:
+        out["censoring"] = "missing"
     return out.sort_values(["peptide_id", "record_id"]).reset_index(drop=True)
 
 
 COLUMNS = [
     "peptide_id", "record_id", "target_cell", "species", "taxon_class",
     "nucleated", "is_erythrocyte", "concentration_unit", "lysis_endpoint",
-    "endpoint_is_hc50",
+    "endpoint_is_hc50", "censoring",
 ]
+# `_concentration_raw` is deliberately absent: it is the measured value, and
+# this artifact publishes identifiers and DBAASP-derived classifications only.

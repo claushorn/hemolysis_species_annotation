@@ -129,6 +129,15 @@ def coverage(ann: pd.DataFrame, refs: pd.DataFrame | None,
         "target_cells_distinct": int(ery.target_cell.nunique()),
         "target_cell_named_pct": round(100.0 * (ery.target_cell != "").mean(), 2),
         "non_mammalian_records": int((ery.taxon_class != "mammal").sum()),
+        # Censoring, which both benchmarks drop. A `>c` record says the assay
+        # never reached the endpoint, so the HC50 is ABOVE c; recorded as the
+        # point c it understates safety, selectively for the peptides that
+        # matter most to a safety model.
+        "records_by_censoring": ann.censoring.value_counts().to_dict(),
+        "records_erythrocyte_hc50_right_censored": int(
+            (elig.censoring == "right").sum()),
+        "records_erythrocyte_hc50_right_censored_pct": round(
+            100.0 * (elig.censoring == "right").mean(), 2) if len(elig) else 0.0,
         "nucleated_records": int(ery.nucleated.fillna(False).sum()),
         "by_target_cell": ery.target_cell.value_counts().to_dict(),
     }
@@ -176,6 +185,15 @@ def report(ann: pd.DataFrame, cov: dict) -> None:
         t = ery[ery.target_cell == name].iloc[0]
         flag = "" if t.taxon_class == "mammal" else f"   <-- {t.taxon_class}, nucleated"
         print(f"  {k:6d}  {100 * k / len(ery):5.1f}%  {name:26s}{flag}")
+
+    print("\n" + "=" * 72)
+    print("Censoring: how many records are bounds rather than measurements")
+    print("=" * 72)
+    for k, v in cov["records_by_censoring"].items():
+        print(f"  {k:12s} {v:6d}  ({100*v/cov['records_total']:5.1f}%)")
+    print(f"  of the {cov['records_erythrocyte_hc50_endpoint']} eligible HC50 records, "
+          f"{cov['records_erythrocyte_hc50_right_censored']} "
+          f"({cov['records_erythrocyte_hc50_right_censored_pct']}%) are right-censored")
 
     print("\n" + "=" * 72)
     print("Why this matters for evaluation, not for accuracy")

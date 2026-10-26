@@ -40,6 +40,7 @@ record, **5,461 records over 3,001 peptides**.
 | `concentration_unit` | DBAASP's reported unit, `µM` or `µg/ml`. |
 | `lysis_endpoint` | Verbatim endpoint, e.g. `50% Hemolysis`, `9.63±1.50% Hemolysis`, `>50% Hemolysis`. |
 | `endpoint_is_hc50` | Whether that endpoint is a 50% lysis point rather than another level or a bound. |
+| `censoring` | Whether the tested concentration was a point (`exact`), a bound the assay never reached (`right`), `left`, an `interval`, `ambiguous`, or `missing`. **The second load-bearing column** - see below. |
 
 `annotation/coverage.json` carries the counts below in machine-readable form.
 
@@ -93,6 +94,40 @@ from — peptides whose records span more than one donor:
 A peptide-level `[min, max, consensus]` over such a set cannot be reconstructed, and the
 pooled value leaves no variable to condition on. Both scopes are in `coverage.json`: a
 claim addressed to one benchmark should use that benchmark's own count.
+
+### A quarter of the records are bounds, not measurements
+
+DBAASP stores the tested concentration as free text, and that text is the only
+place the censoring survives. `256` is a measured HC50; **`>256` means the assay
+never reached 50% lysis at the highest concentration tested**, so the true HC50
+lies somewhere above 256. The numeric field DBAASP also provides drops the `>`,
+and both benchmarks inherit that loss.
+
+| form | records | meaning |
+|---|---|---|
+| point | 3,827 | a measurement, possibly with a reported spread |
+| **`>N`, `>=N`, `>>N`, `up to N`** | **1,503 (27.5%)** | **right-censored: HC50 is above the bound** |
+| `N-N` | 36 | a range; `censoring = interval` |
+| `<N` | 29 | left-censored |
+| `N<` | 4 | direction not recoverable from the string; flagged, not guessed |
+| `NA` / empty | 62 | no value |
+
+Restricted to the erythrocyte records at a 50% endpoint that an HC50 target is
+built from, **1,171 of 3,142 (37.3%) are right-censored.**
+
+The bias has a direction, and it is the unsafe one. A right-censored record is
+evidence that the peptide is *less* hemolytic than the bound, so recording it as
+`HC50 = bound` overstates toxicity - selectively, for exactly the non-hemolytic
+peptides a safety model exists to identify. It also manufactures a spike in the
+label distribution at whatever round concentration people stopped testing at,
+which no model can explain and every model is scored against.
+
+This column is why the artifact is worth joining even if you do not care about
+the target cell. Treating these records as bounds rather than points, with a
+Tobit likelihood on otherwise identical features and scored only on uncensored
+test rows, is worth **+0.074 Pearson r (95% CI [+0.034, +0.119])** on QMAP's own
+five splits - substantially more than conditioning a model on the target cell,
+and more than any change of estimator we were able to find.
 
 ### Four consumed records are not HC50 measurements
 
@@ -179,7 +214,8 @@ That acknowledgement is mandatory for any downstream use; see `LICENSE`.
 > Research, 2021.
 
 **This annotation contains no AMPBench-MT or QMAP data.** Only DBAASP record identifiers and
-DBAASP-derived fields. No sequences, no HC50 values, no splits, no cluster assignments. That
+DBAASP-derived fields. No sequences, no HC50 values, no splits, no cluster assignments. The
+`censoring` column records whether a measurement was a bound, not what the measurement was. That
 is deliberate: AMPBench-MT ships under a custom research-review-use licence that does not
 permit redistribution, and an annotation keyed by identifiers avoids the question entirely
 while remaining joinable to either benchmark. The annotation table is released **CC BY 4.0**

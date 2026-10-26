@@ -14,6 +14,7 @@ from .annotate import (
     annotate,
     index_records,
     is_hc50_endpoint,
+    parse_concentration,
     parse_source_ids,
     unreviewed_cells,
 )
@@ -21,6 +22,7 @@ from .fetch import ENDPOINT, fetch, fetch_many
 
 __all__ = [
     "COLUMNS", "ENDPOINT", "ERYTHROCYTE_TAXON", "TOKEN", "annotate", "fetch",
-    "fetch_many", "index_records", "is_hc50_endpoint", "parse_source_ids",
+    "fetch_many", "index_records", "is_hc50_endpoint", "parse_concentration",
+    "parse_source_ids",
     "unreviewed_cells",
 ]
