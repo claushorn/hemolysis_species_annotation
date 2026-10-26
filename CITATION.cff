@@ -22,6 +22,7 @@ abstract: >-
   possible; conditioning a model on the target cell is not proposed as a route
   to higher predictive accuracy, while honouring the censoring measurably is.
 type: dataset
+doi: 10.5281/zenodo.23661947
 authors:
   - family-names: Horn
     given-names: Claus

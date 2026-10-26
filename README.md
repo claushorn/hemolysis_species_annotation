@@ -1,4 +1,6 @@
-# Which cell was the assay run on? A recovered target-cell annotation for DBAASP hemolytic records
+# Which cell was the assay run on, and did the assay finish? A recovered annotation for DBAASP hemolytic records
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23661947.svg)](https://doi.org/10.5281/zenodo.23661947)
 
 Both the **AMPBench-MT** and **QMAP** HC50 regression targets aggregate DBAASP
 hemolytic/cytotoxic activity records while discarding the identity of the cell the assay
@@ -223,5 +225,6 @@ and the code **MIT**.
 
 ## Citing
 
-See `CITATION.cff`. Cite DBAASP in all cases; cite QMAP
-(doi:10.64898/2026.02.03.703041) if you use its splits.
+See `CITATION.cff`. This annotation: **doi:10.5281/zenodo.23661947** (concept DOI, always the
+latest version; v1.0.0 is doi:10.5281/zenodo.23661948). Cite DBAASP in all
+cases; cite QMAP (doi:10.64898/2026.02.03.703041) if you use its splits.
