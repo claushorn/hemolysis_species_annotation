@@ -11,9 +11,16 @@ abstract: >-
   targets. This annotation recovers the discarded field from DBAASP for every
   record either benchmark consumes, keyed by DBAASP's own identifiers, together
   with the donor taxon, whether the erythrocytes are nucleated, the reported
-  concentration unit and the verbatim lysis endpoint. It is intended to make
-  per-target-cell evaluation possible; it is not proposed as a route to higher
-  predictive accuracy.
+  concentration unit and the verbatim lysis endpoint. It also recovers a second
+  discarded field: the CENSORING. DBAASP records a concentration as free text,
+  where ">256" means the assay never reached 50% lysis at the highest
+  concentration tested, and both benchmarks collapse such a bound to a point.
+  1,503 of 5,461 records (27.5%) are right-censored, and 1,171 of the 3,142
+  erythrocyte records at a 50% lysis endpoint are. Recording a bound as a point
+  overstates toxicity, selectively, for the least hemolytic peptides. The
+  annotation is intended to make per-target-cell and censoring-aware evaluation
+  possible; conditioning a model on the target cell is not proposed as a route
+  to higher predictive accuracy, while honouring the censoring measurably is.
 type: dataset
 authors:
   - family-names: Horn
@@ -27,6 +34,8 @@ keywords:
   - benchmark
   - data annotation
   - evaluation
+  - censored data
+  - right censoring
 references:
   - type: database
     title: >-
